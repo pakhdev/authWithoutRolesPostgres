@@ -3,13 +3,14 @@ import {
     Get,
     Post,
     Body,
-    UseGuards,
+    UseGuards, Patch, Param, ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './auth.service';
-import { GetUser } from './decorators/get-user.decorator';
-import { LoginUserDto, CreateUserDto } from './dto/';
+
 import { User } from './entities/user.entity';
+import { AuthService } from './auth.service';
+import { LoginUserDto, CreateUserDto, UpdateUserDto } from './dto/';
+import { GetUser } from './decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +25,15 @@ export class AuthController {
     @Post('login')
     loginUser(@Body() loginUserDto: LoginUserDto) {
         return this.authService.login(loginUserDto);
+    }
+
+    @UseGuards(AuthGuard())
+    @Patch('update/:id')
+    updateUser(
+        @Param('id', ParseUUIDPipe) id: string,
+        @GetUser() user: User,
+        @Body() updateUserDto: UpdateUserDto) {
+        return this.authService.update(id, user, updateUserDto);
     }
 
     @Get('check-auth-status')
